@@ -1,3 +1,13 @@
+# Running with Docker at Win10
+Running the code below in cmd will clone the repo, create env and run 2 scripts to check it. 
+```
+git clone https://github.com/Pqlet/SoftHebb.git
+
+docker run --shm-size=6gb --gpus all --name hebb_docker -v <full path to cwd>:/usr/docker_sharedpc -itd continuumio/anaconda3 
+
+docker exec -it hebb_docker /bin/bash -c /usr/docker_sharedpc/SoftHebb/init.sh
+```
+---
 # SoftHebb
 _This open source project is not an official Huawei product. Huawei is not expected to provide support for this project._
 ### Hebbian Deep Learning Without Feedback (ICLR 2023)
