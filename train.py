@@ -283,7 +283,7 @@ def run_hybrid(
                 _, train_loss, train_acc, test_loss, test_acc = log.data[-1]
 
                 conv, R1 = model.convergence()
-                report(train_loss=train_loss, train_acc=train_acc, test_loss=test_loss, test_acc=test_acc,
+                report(epoch=epoch, train_loss=train_loss, train_acc=train_acc, test_loss=test_loss, test_acc=test_acc,
                        convergence=conv, R1=R1)
 
             else:
@@ -330,7 +330,7 @@ def run_unsup(
             log.step(epoch, acc_train, acc_test, info, convergence, R1, lr)
 
             if report is not None:
-                report(train_loss=0., train_acc=acc_train, test_loss=0., test_acc=acc_test, convergence=convergence,
+                report(epoch=epoch, train_loss=0., train_acc=acc_train, test_loss=0., test_acc=acc_test, convergence=convergence,
                        R1=R1)
             # else:
             log.verbose()
@@ -398,7 +398,7 @@ def run_sup(
             if report is not None:
                 _, train_loss, train_acc, test_loss, test_acc = log.data[-1]
                 conv, R1 = model.convergence()
-                report(train_loss=train_loss, train_acc=train_acc, test_loss=test_loss, test_acc=test_acc,
+                report(epoch=epoch, train_loss=train_loss, train_acc=train_acc, test_loss=test_loss, test_acc=test_acc,
                        convergence=conv, R1=R1)
             else:
                 log.verbose()

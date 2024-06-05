@@ -13,11 +13,12 @@ from torch.optim.lr_scheduler import StepLR
 #data_candidate = ('/scratch' if 'hrodriguez' == username else '/home') + f'/{username}/workspace'
 #DATA = op.realpath(op.expanduser(data_candidate))
 #pqlet - change logdir to dir in the project folder
-DATA = "/usr/docker_sharedpc/SoftHebb/runs"
-
+# DATA = "/usr/docker_sharedpc/SoftHebb/runs"
+# pqlet for win10
+DATA = "./"
 RESULT = op.join(DATA, 'results', 'hebb', 'result')  # everything from multi_layer.py
-SEARCH = op.join(DATA, 'results', 'hebb', 'search')  # everything from ray_search
-DATASET = op.join(DATA, 'data')
+SEARCH = op.join(DATA, 'results', 'hebb', 'search')  # everything from ray_search.py
+DATASET = op.join(DATA, 'data') # for dataset.py. Imported and used as a default param
 
 
 def get_folder_name(params):

@@ -21,6 +21,8 @@ import os
 warnings.filterwarnings("ignore")
 
 metric_names = ['train_loss', 'train_acc', 'test_loss', 'test_acc', 'convergence', 'R1']
+# pqlet - for epoch logging
+metric_names += ['epoch']
 
 parser = argparse.ArgumentParser(description='Multi layer Hebbian Training')
 
@@ -181,7 +183,8 @@ def main(params, dataset_sup_config, dataset_unsup_config, blocks, config):
                 report=tune.report,
                 save=params.save_model,
                 reset=False,
-                model_dir=tune.session.get_trial_dir(),
+                # model_dir=tune.session.get_trial_dir(), # for v1.4...
+                model_dir=tune.trainable.session.get_trial_dir(), # for v2.2.0
             )
         elif config['mode'] == 'supervised':
             print('Running supervised')
@@ -198,7 +201,7 @@ def main(params, dataset_sup_config, dataset_unsup_config, blocks, config):
                 blocks=config['blocks'],
                 report=tune.report,
                 save=params.save_model,
-                model_dir=tune.session.get_trial_dir(),
+                model_dir=tune.trainable.session.get_trial_dir(),
             )
         else:
             run_hybrid(
@@ -214,7 +217,7 @@ def main(params, dataset_sup_config, dataset_unsup_config, blocks, config):
                 blocks=config['blocks'],
                 report=tune.report,
                 save=params.save_model,
-                model_dir=tune.session.get_trial_dir(),
+                model_dir=tune.trainable.session.get_trial_dir(),
             )
 
 
@@ -233,7 +236,10 @@ if __name__ == '__main__':
         # local_mode=True for debugging . It seems there's no need to init ray for these usecase
         ray.init(local_mode=True)
 
-    reporter = CLIReporter(max_progress_rows=12)
+    reporter = CLIReporter(
+        max_progress_rows=12, 
+        max_report_frequency=5*60 # Maximum report frequency in seconds. Default is set to 5s.
+        )
     for metric in metric_names:
         reporter.add_metric_column(metric)
 
@@ -246,16 +252,16 @@ if __name__ == '__main__':
     #pqlet - fix for 0/0 gpus in docker
     ray.init(num_gpus=1)
     # was unnecessary
-    #os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
     
-    # TODO: use ray for model storing, as it is better aware of the different variants
+    # TODO: use ray for model storing, as it is better aware of the different variants    
     analysis = tune.run(
         trial_exp,
         resources_per_trial={
-            "cpu": 6,
+            "cpu": 2,
             #"gpu": max(1 / params.gpu_exp, torch.cuda.device_count() * 4 / 86)
-            #pqlet
+            # pqlet
             "gpu": 1
         },
         metric=params.metric,
@@ -266,6 +272,8 @@ if __name__ == '__main__':
         num_samples=params.num_samples,
         local_dir=SEARCH,
         name=params.folder_name,
+        # v2.2.0
+        chdir_to_trial_dir=False,
         #pqlet - not for ray tune v1.4.1
-        # max_concurrent_trials=4        
+        # max_concurrent_trials=2
         )
