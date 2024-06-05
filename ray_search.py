@@ -86,7 +86,7 @@ parser.add_argument('--debug', default=False, action='store_true', help='Debug m
 
 parser.add_argument('--max-report-frequency', default=5*60, type=int, help='Maximum report frequency in seconds. Default of CLIReporter is 5s.')
 
-parser.add_argument('--max-concurrent', default=1, type=int, help='Maximum number of concurrently running trials. If 0 (default), no maximum is enforced.')
+parser.add_argument('--max-concurrent', default=0, type=int, help='Maximum number of concurrently running trials. If 0 (default), no maximum is enforced, and all the runs are seen pending.')
 
 def get_config(config_name):
     if config_name == 'regimes':
@@ -262,10 +262,10 @@ if __name__ == '__main__':
     analysis = tune.run(
         trial_exp,
         resources_per_trial={
-            "cpu": 6,
+            "cpu": 0,
             #"gpu": max(1 / params.gpu_exp, torch.cuda.device_count() * 4 / 86)
             # pqlet
-            "gpu": 0,
+            "gpu": 1,
             
         },
         # tune_config=tune.TuneConfig(max_concurrent_trials=1),
@@ -275,7 +275,8 @@ if __name__ == '__main__':
         config=config,
         progress_reporter=reporter,
         num_samples=params.num_samples,
-        max_concurrent_trials=1,
+        # Not for BasicVariantGenerator()
+        # max_concurrent_trials=1,
         local_dir=SEARCH,
         name=params.folder_name,
         # v2.2.0
