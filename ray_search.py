@@ -262,7 +262,7 @@ if __name__ == '__main__':
     analysis = tune.run(
         trial_exp,
         resources_per_trial={
-            "cpu": 0,
+            "cpu": 6,
             #"gpu": max(1 / params.gpu_exp, torch.cuda.device_count() * 4 / 86)
             # pqlet
             "gpu": 1,
