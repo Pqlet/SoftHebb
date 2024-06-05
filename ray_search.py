@@ -84,6 +84,9 @@ parser.add_argument('--save-model', default=False, action='store_true',
 
 parser.add_argument('--debug', default=False, action='store_true', help='Debug mode (ray local)')
 
+parser.add_argument('--max-report-frequency', default=5*60, type=int, help='Maximum report frequency in seconds. Default of CLIReporter is 5s.')
+
+parser.add_argument('--max-concurrent', default=1, type=int, help='Maximum number of concurrently running trials. If 0 (default), no maximum is enforced.')
 
 def get_config(config_name):
     if config_name == 'regimes':
@@ -238,12 +241,12 @@ if __name__ == '__main__':
 
     reporter = CLIReporter(
         max_progress_rows=12, 
-        max_report_frequency=5*60 # Maximum report frequency in seconds. Default is set to 5s.
+        max_report_frequency=params.max_report_frequency 
         )
     for metric in metric_names:
         reporter.add_metric_column(metric)
 
-    algo_search = BasicVariantGenerator()
+    algo_search = BasicVariantGenerator(max_concurrent=params.max_concurrent)
 
     trial_exp = partial(
         main, params, dataset_sup_config, dataset_unsup_config, blocks
@@ -259,21 +262,22 @@ if __name__ == '__main__':
     analysis = tune.run(
         trial_exp,
         resources_per_trial={
-            "cpu": 2,
+            "cpu": 6,
             #"gpu": max(1 / params.gpu_exp, torch.cuda.device_count() * 4 / 86)
             # pqlet
-            "gpu": 1
+            "gpu": 0,
+            
         },
+        # tune_config=tune.TuneConfig(max_concurrent_trials=1),
         metric=params.metric,
         mode='min' if params.metric.endswith('loss') else 'max',
         search_alg=algo_search,
         config=config,
         progress_reporter=reporter,
         num_samples=params.num_samples,
+        max_concurrent_trials=1,
         local_dir=SEARCH,
         name=params.folder_name,
         # v2.2.0
         chdir_to_trial_dir=False,
-        #pqlet - not for ray tune v1.4.1
-        # max_concurrent_trials=2
         )
